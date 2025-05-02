@@ -18,6 +18,8 @@ app.use(
     })
 )
 
+app.use('/uploads', express.static('uploads'));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 //db
