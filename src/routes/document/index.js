@@ -4,6 +4,7 @@ const DocumentController = require('../../controllers/document.controller');
 const upload = require('../../middleware/upload.middleware');
 const { authentication } = require('../../auth/authUtils');
 
+router.use(authentication)
 
 // Thêm tài liệu
 router.post('/', upload, DocumentController.createDocument);
@@ -30,5 +31,7 @@ router.get('/', DocumentController.getAllDocuments);
 router.get('/:id', DocumentController.getDocument);
 
 router.get('/:id/summarize', DocumentController.summarizeDocument)
+
+router.post('/add/:id', DocumentController.addDocToFolder)
 
 module.exports = router;

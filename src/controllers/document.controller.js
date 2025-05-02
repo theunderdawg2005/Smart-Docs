@@ -142,6 +142,17 @@ class DocumentController {
       res.status(500).json({ message: 'Error summarizing document', error: error.message });
     }
   }
+
+  async addDocToFolder(req, res) {
+    try {
+      res.json({
+        message: "Added document to folder!",
+        data: await DocumentService.addDocumentToFolder(req.params.id, req.body.folderId)
+      })
+    } catch (error) {
+      res.status(500).json({ message: "Error moving document", error: error.message });
+    }
+  }
 }
 
 module.exports = new DocumentController();

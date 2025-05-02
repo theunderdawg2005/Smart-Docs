@@ -10,6 +10,10 @@ const folderSchema =  new Schema({
         type: Types.ObjectId,
         ref: "User"
     },
+    quantity: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now

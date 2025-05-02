@@ -6,7 +6,15 @@ const { stderr, stdout } = require('process');
 const pdfParse = require('pdf-parse')
 const mammoth = require('mammoth');
 const { default: axios } = require('axios');
-
+const { updateQuantityFolder } = require('../models/repository/folder.repo');
+const folderModel = require('../models/folder.model');
+const { BadRequestError } = require('openai');
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 class DocumentService {
   // Thêm tài liệu
@@ -44,11 +52,12 @@ class DocumentService {
     if (!document) {
       throw new Error('Document not found');
     }
-    // Xóa file khỏi server
-    if (await fs.access(document.filePath).then(() => true).catch(() => false)) {
-      await fs.unlink(document.filePath);
-    }
-    return document;
+    
+    const publicId = document.fileUrl.split('/').pop().split('.')[0]
+
+    await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' })
+
+    await Document.deleteOne({ _id: id})
   }
 
   // Tạo link chia sẻ
@@ -183,7 +192,22 @@ class DocumentService {
     return finalSummary;
   }
 
-
+  async addDocumentToFolder(documentId, folderId) {
+    const document = await Document.findById(documentId)
+    
+    if(document.folderId.toString() === folderId) {
+      throw new BadRequestError("Document is already added to folder!")
+    }
+    await updateQuantityFolder(folderId)
+    
+    return await Document.findByIdAndUpdate(
+      documentId
+    , {
+      folderId
+    }, {
+      new: true
+    })
+  }
 
 }
 

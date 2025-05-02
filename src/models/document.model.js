@@ -25,6 +25,10 @@ const documentSchema = new mongoose.Schema({
     },
     extractedText: { type: String },
     summary: { type: String },
+    folderId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Folder'
+    },
     createdAt: {
         type: Date,
         default: Date.now
