@@ -9,6 +9,7 @@ const { default: axios } = require('axios');
 const { updateQuantityFolder } = require('../models/repository/folder.repo');
 const folderModel = require('../models/folder.model');
 const { BadRequestError } = require('openai');
+const { searchProductByUser } = require('../models/repository/product.repo');
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -30,6 +31,15 @@ class DocumentService {
     return await document.save();
   }
 
+  async getDocumentByUserId(userId) {
+    return await Document.find({
+      uploadedBy: userId
+    }).sort({
+      createdAt: -1
+    })
+
+  }
+
   // Sửa tài liệu
   async updateDocument(id, { title, tags }) {
     const document = await Document.findByIdAndUpdate(
@@ -39,7 +49,7 @@ class DocumentService {
         tags: tags ? tags.split(',').map(tag => tag.trim()) : []
       },
       { new: true }
-    );
+    )
     if (!document) {
       throw new Error('Document not found');
     }
@@ -60,25 +70,12 @@ class DocumentService {
     await Document.deleteOne({ _id: id})
   }
 
-  // Tạo link chia sẻ
-  async shareDocument(id) {
-    const document = await Document.findById(id);
-    if (!document) {
-      throw new Error('Document not found');
-    }
-    const sharedLink = `http://your-backend-url/api/documents/share/${document._id}-${Date.now()}`;
-    document.sharedLink = sharedLink;
-    await document.save();
-    return sharedLink;
-  }
+  async searchDocumentsByUser(keyword) {
+    const documents = await Document.find({
+      title: { $regex: keyword, $options: "i"}
+    })
 
-  // Truy cập tài liệu qua link chia sẻ
-  async getSharedDocument(shareId) {
-    const document = await Document.findOne({ sharedLink: `http://your-backend-url/api/documents/share/${shareId}` });
-    if (!document) {
-      throw new Error('Shared document not found');
-    }
-    return document;
+    return documents
   }
 
   // Tìm kiếm tài liệu

@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const { BadRequestError } = require('../core/error.response');
 const { SuccessResponse } = require('../core/success.response');
 const cloudinary = require('cloudinary').v2
+const streamifier = require('streamifier')
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -31,13 +32,16 @@ class DocumentController {
 
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-          { resource_type: 'raw' },
+          { 
+            resource_type: 'raw',
+            folder: "documents",
+          },
         (error, result) => {
           if(error) reject(error);
           else resolve(result)
         }
         );
-        stream.end(fileBuffer)
+        streamifier.createReadStream(fileBuffer).pipe(stream)
       })
 
       const document = await DocumentService.createDocument( userId,{
@@ -97,12 +101,9 @@ class DocumentController {
 
   // Tìm kiếm tài liệu
   async searchDocuments(req, res) {
-    try {
-      const documents = await DocumentService.searchDocuments(req.query);
-      res.json(documents);
-    } catch (error) {
-      res.status(500).json({ message: 'Error searching documents', error: error.message });
-    }
+    const keyword = req.query.q
+    const results = await DocumentService.searchDocumentsByUser(keyword)
+    res.json(results)
   }
 
   // Lấy tất cả tài liệu
@@ -119,9 +120,21 @@ class DocumentController {
   async getDocument(req, res) {
     try {
       const document = await DocumentService.getDocumentById(req.params.id);
-      res.redirect(document.fileUrl)
+      res.json(document)
     } catch (error) {
       res.status(error.message === 'Document not found' ? 404 : 500).json({ message: error.message });
+    }
+  }
+
+  async getDocumentByUserId(req, res) {
+    try {
+      const document = await DocumentService.getDocumentByUserId(req.user.userId)
+      console.log(req.user.userId)
+      res.json(document)
+    } catch (error) {
+      res.status(error.message === 'User not found' ? 404: 500).json({
+        message: error.message
+      })
     }
   }
 

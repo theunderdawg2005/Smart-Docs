@@ -7,7 +7,7 @@ const { authentication } = require('../../auth/authUtils');
 router.use(authentication)
 
 // Thêm tài liệu
-router.post('/', upload, DocumentController.createDocument);
+router.post('/', upload ,DocumentController.createDocument);
 
 // Sửa tài liệu
 router.put('/:id', DocumentController.updateDocument);
@@ -27,11 +27,15 @@ router.get('/search', DocumentController.searchDocuments);
 // Lấy tất cả tài liệu
 router.get('/', DocumentController.getAllDocuments);
 
+router.get('/get-docs-user', DocumentController.getDocumentByUserId)
+
+router.post('/add/:id', DocumentController.addDocToFolder)
+
+router.get('/sumarize/:id', DocumentController.summarizeDocument)
+
 // Xem tài liệu
 router.get('/:id', DocumentController.getDocument);
 
-router.get('/:id/summarize', DocumentController.summarizeDocument)
 
-router.post('/add/:id', DocumentController.addDocToFolder)
 
 module.exports = router;

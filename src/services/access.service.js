@@ -7,7 +7,13 @@ const { findUserByEmail } = require("./user.service")
 const { getInfoData } = require("../utils")
 
 class AccessService {
-    static signUp = async ({fullname, username, email, password, phone, address}) => {
+    static signUp = async (payload) => {
+      try {
+        if (!payload) {
+          throw new BadRequestError("Missing request body");
+        }
+
+        const { fullname, username, email, password, phone } = payload;
         const existedUser = await userModel.findOne({email}).lean()
         if(existedUser) {
             throw new BadRequestError("Người dùng đã tồn tại")
@@ -21,7 +27,6 @@ class AccessService {
             email,
             password: passwordHash,
             phoneNumber: phone,
-
         })
 
         if(newUser)
@@ -53,6 +58,12 @@ class AccessService {
             code: 200,
             data: null
         }
+      }
+      catch (error) 
+      {
+        console.error("SignUp Error:", error); 
+        throw error;
+      }
     }
 
     static login = async ({email, password}) => {
@@ -72,7 +83,7 @@ class AccessService {
 
       return {
         user: getInfoData({
-          fields: [ "_id", "fullname" ,"email"],
+          fields: [ "_id", "fullname", "username", "email", "phone"],
           object: userFound
         }),
         tokens
