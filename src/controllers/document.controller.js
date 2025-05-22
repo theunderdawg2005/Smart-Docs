@@ -166,6 +166,21 @@ class DocumentController {
       res.status(500).json({ message: "Error moving document", error: error.message });
     }
   }
+
+  async togglePinDocument(req, res) {
+    try {
+      
+      const document = await DocumentService.togglePinDocument(req.params.id)
+      res.json({
+        message: 'Toggled oke!',
+        metada: document
+      })
+    } catch (error) {
+      res.status(error.message === 'Document not found' ? 404 : 500).json({
+        message: error.message
+      });
+    }
+  }
 }
 
 module.exports = new DocumentController();

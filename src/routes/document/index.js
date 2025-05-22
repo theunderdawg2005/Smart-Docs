@@ -16,7 +16,9 @@ router.put('/:id', DocumentController.updateDocument);
 router.delete('/:id', DocumentController.deleteDocument);
 
 // Chia sẻ tài liệu
-router.post('/:id/share', DocumentController.shareDocument);
+router.post('/share/:id', DocumentController.shareDocument);
+
+router.post('/toggle-pin/:id', DocumentController.togglePinDocument)
 
 // Truy cập tài liệu qua link chia sẻ
 router.get('/share/:shareId', DocumentController.getSharedDocument);

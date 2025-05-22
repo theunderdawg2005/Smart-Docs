@@ -29,6 +29,10 @@ const documentSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Folder'
     },
+    isPinned: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

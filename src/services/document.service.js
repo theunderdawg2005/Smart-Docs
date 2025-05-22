@@ -10,6 +10,7 @@ const { updateQuantityFolder } = require('../models/repository/folder.repo');
 const folderModel = require('../models/folder.model');
 const { BadRequestError } = require('openai');
 const { searchProductByUser } = require('../models/repository/product.repo');
+const { NotFoundError } = require('../core/error.response');
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -204,6 +205,17 @@ class DocumentService {
     }, {
       new: true
     })
+  }
+
+  async togglePinDocument(documentId) {
+    const document = await Document.findById(documentId)
+    if(!document) {
+      throw new NotFoundError("Document not found")
+    }
+
+    document.isPinned = !document.isPinned
+    await document.save()
+    return document
   }
 
 }
