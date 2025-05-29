@@ -13,51 +13,56 @@ cloudinary.config({
 
 class DocumentController {
   // Thêm tài liệu
-  async createDocument(req, res) {
-    try {
-      if (!req.file) {
-        new BadRequestError({
-          message: 'No file uploaded'
-        })
-      }
-      const { title, tags } = req.body;
-      const userId = req.user.userId
-      if (!title) {
-        new BadRequestError({
-          message: 'title is required'
-        })
-      }
-
-      const fileBuffer = req.file.buffer
-
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { 
-            resource_type: 'raw',
-            folder: "documents",
-          },
-        (error, result) => {
-          if(error) reject(error);
-          else resolve(result)
+    async createDocument(req, res) {
+      try {
+        if (!req.file) {
+          throw new BadRequestError({
+            message: 'No file uploaded'
+          })
         }
-        );
-        streamifier.createReadStream(fileBuffer).pipe(stream)
-      })
+        const { title, tags } = req.body;
+        const userId = req.user.userId
+        if (!title) {
+          throw new BadRequestError({
+            message: 'title is required'
+          })
+        }
+        console.log('FILE: ', req.file);
+        console.log("title: ", title);
+        
+        
+        const fileBuffer = req.file.buffer
 
-      const document = await DocumentService.createDocument( userId,{
-        title,
-        fileUrl: result.secure_url,
-        fileName: req.file.originalname,
-        fileType: req.file.mimetype,
-        tags: tags ? tags.split(',') : [],
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { 
+              resource_type: 'raw',
+              folder: "documents",
+            },
+          (error, result) => {
+            if(error) reject(error);
+            else resolve(result)
+          }
+          );
+          streamifier.createReadStream(fileBuffer).pipe(stream)
+        })
 
-      });
+        const document = await DocumentService.createDocument( userId,{
+          title,
+          fileUrl: result.secure_url,
+          fileName: req.file.originalname,
+          fileType: req.file.mimetype,
+          tags: tags ? tags.split(',') : [],
 
-      res.status(201).json({ message: 'Document uploaded successfully', document });
-    } catch (error) {
-      res.status(500).json({ message: 'Error uploading document', error: error.message });
+        });
+
+        res.status(201).json({ message: 'Document uploaded successfully', document });
+      } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({ message: 'Error uploading document', error: error.message });
+      }
     }
-  }
 
   // Sửa tài liệu
   async updateDocument(req, res) {
@@ -65,6 +70,7 @@ class DocumentController {
       const document = await DocumentService.updateDocument(req.params.id, req.body);
       res.json({ message: 'Document updated successfully', document });
     } catch (error) {
+      console.log(error.message);
       res.status(error.message === 'Document not found' ? 404 : 500).json({ message: error.message });
     }
   }
@@ -181,6 +187,30 @@ class DocumentController {
       });
     }
   }
+
+  async getPinnedDocument(req, res) {
+    try {
+      
+      const document = await DocumentService.getPinnedDocumentByUserId(req.user.userId)
+      res.json(document)
+    } catch (error) {
+      res.status(error.message === 'User not found' ? 404 : 500).json({
+        message: error.message
+      });
+    }
+  }
+
+  async filterDocument(req, res) {
+    try {
+      const documents = await DocumentService.filterDocument(req.user.userId, req.query)
+      res.json(documents)
+    } catch (error) {
+      res.status(error.message === 'User not found' ? 404 : 500).json({
+        message: error.message
+      });
+    }
+  }
 }
+
 
 module.exports = new DocumentController();

@@ -127,15 +127,18 @@ class DocumentService {
       const response = await axios.get(document.fileUrl, { responseType: 'arraybuffer' })
       const fileBuffer = Buffer.from(response.data)
 
-      const fileExt = path.extname(document.fileName).toLowerCase()
-
-      if (fileExt === '.pdf') {
+      const fileExt = document.fileType
+      console.log(fileExt);
+      
+      if (fileExt === 'application/pdf') {
+        
+        
         const pdfData = await pdfParse(fileBuffer);
         return pdfData.text;
-      } else if (fileExt === '.docx' || fileExt === '.doc') {
+      } else if (fileExt === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const result = await mammoth.extractRawText({ buffer: fileBuffer });
         return result.value;
-      } else if (fileExt === '.txt') {
+      } else if (fileExt === 'text/plain') {
         return fileBuffer.toString();
       } else {
         throw new Error('Unsupported file type');
@@ -170,7 +173,7 @@ class DocumentService {
             text: chunk,
             max_length: 100,
             min_length: 30
-          },
+          },  
           {
             headers: {
               'Content-Type': 'application/json'
@@ -216,6 +219,33 @@ class DocumentService {
     document.isPinned = !document.isPinned
     await document.save()
     return document
+  }
+
+  async getPinnedDocumentByUserId(userId) {
+    return await Document.find({
+      uploadedBy: userId,
+      isPinned: true
+    }).sort({
+      createdAt: -1
+    })
+  }
+
+  async filterDocument(userId, payload) {
+    const {tags, fileType} = payload
+    const query = { uploadedBy: userId}
+
+    if(tags && tags.length > 0)
+    {
+      const tagArray = Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim());
+      query.tags = { $all: tagArray}
+    }
+
+    if(fileType)
+    {
+      query.fileType = fileType
+    }
+
+    return await Document.find(query).sort({createdAt: -1})
   }
 
 }
