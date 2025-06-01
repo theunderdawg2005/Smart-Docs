@@ -29,13 +29,13 @@ class DocumentController {
         }
         console.log('FILE: ', req.file);
         console.log("title: ", title);
-        
-        
+
+
         const fileBuffer = req.file.buffer
 
         const result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { 
+            {
               resource_type: 'raw',
               folder: "documents",
             },
@@ -59,7 +59,7 @@ class DocumentController {
         res.status(201).json({ message: 'Document uploaded successfully', document });
       } catch (error) {
         console.log(error);
-        
+
         res.status(500).json({ message: 'Error uploading document', error: error.message });
       }
     }
@@ -162,16 +162,18 @@ class DocumentController {
     }
   }
 
-  async addDocToFolder(req, res) {
+async addDocToFolder(req, res) {
     try {
-      res.json({
-        message: "Added document to folder!",
-        data: await DocumentService.addDocumentToFolder(req.params.id, req.body.folderId)
-      })
+        const document = await DocumentService.addDocumentToFolder(req.params.id, req.body.folderId);
+        new SuccessResponse({
+            message: "Added document to folder!",
+            metadata: document
+        }).send(res);
     } catch (error) {
-      res.status(500).json({ message: "Error moving document", error: error.message });
+        console.log(error);
+        throw error; // Ném lỗi để middleware xử lý
     }
-  }
+}
 
   async togglePinDocument(req, res) {
     try {

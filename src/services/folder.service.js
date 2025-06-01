@@ -11,9 +11,9 @@ class FolderService {
 
 
     static getFoldersByUserId = async (userId) => {
-        return await folderModel.findOne({
+        return await folderModel.find({
             userId: userId
-        })
+        }).sort({ createdAt: -1 }) // Sort by creation date, newest first
     }
 
     static getDocumentByFolderId = async (folderId) => {
