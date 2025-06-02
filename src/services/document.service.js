@@ -221,20 +221,36 @@ class DocumentService {
   }
 
   async addDocumentToFolder(documentId, folderId) {
-    const document = await Document.findById(documentId)
-    
-    if(document.folderId.toString() === folderId) {
-      throw new BadRequestError("Document is already added to folder!")
-    }
-    await updateQuantityFolder(folderId)
-    
-    return await Document.findByIdAndUpdate(
-      documentId
-    , {
-      folderId
-    }, {
-      new: true
-    })
+      // Kiểm tra đầu vào
+      if (!documentId || typeof documentId !== 'string') {
+          throw new BadRequestError("Invalid document ID");
+      }
+      if (!folderId || typeof folderId !== 'string') {
+          throw new BadRequestError("Invalid folder ID");
+      }
+
+      // Tìm tài liệu
+      const document = await Document.findById(documentId);
+      if (!document) {
+          throw new NotFoundError("Document not found");
+      }
+
+      // Kiểm tra nếu tài liệu đã thuộc thư mục
+      if (document.folderId && document.folderId.toString() === folderId) {
+          throw new BadRequestError("Document is already added to folder!");
+      }
+
+      // Cập nhật số lượng tài liệu trong thư mục
+      await updateQuantityFolder(folderId);
+
+      // Cập nhật folderId cho tài liệu
+      const updatedDocument = await Document.findByIdAndUpdate(
+          documentId,
+          { folderId },
+          { new: true }
+      );
+
+      return updatedDocument;
   }
 
   async togglePinDocument(documentId) {

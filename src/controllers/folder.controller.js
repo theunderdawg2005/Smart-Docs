@@ -22,9 +22,15 @@ class FolderController {
     }
 
     deleteFolder = async (req, res) => {
-        new SuccessResponse({
-            message: "Delete folder successfully!"
-        }).send(res)
+        try {
+            const result = await FolderService.deleteFolder(req.params.id)
+            new SuccessResponse({
+                metadata: result,
+                message: "Delete folder successfully!"
+            }).send(res)
+        } catch (error) {
+            res.status(500).json({ message: "Error deleting folder", error: error.message })
+        }
     }
 }
 
