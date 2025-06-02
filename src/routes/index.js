@@ -9,4 +9,8 @@ router.use('/document', require('./document'))
 
 router.use('/bot', require('./bot'))
 
+router.use('/api', require('./config'))
+
+router.use('/tag', require('./tag'))
+
 module.exports = router

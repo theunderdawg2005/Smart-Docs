@@ -7,21 +7,27 @@ const model = genAI.getGenerativeModel({model: 'gemini-2.0-flash'})
 class BotService {
 
     semanticSearch = async (question, documentId) => {
-        const document = await getDocumentById(documentId)
-        const textDoc = await extractTextFromDocument(document)
+        const textDoc = await extractTextFromDocument(documentId)
+
+        const cleanedText = textDoc.trim();
+        const segments = cleanedText.split('\n').map((s, i) => `${i + 1}. ${s.trim()}`).join('\n');
 
         const prompt = `
-        Bạn là một trợ lý AI. Dưới đây là các đoạn của một tài liệu:
+            Bạn là AI tìm kiếm văn bản thông minh. Văn bản dưới đây được chia thành các đoạn (ngăn cách bằng dấu xuống dòng \`\\n\`). Nhiệm vụ của bạn là tìm đoạn có **ý nghĩa gần nhất với truy vấn**.
 
-        ${textDoc}
+            Văn bản:
+            ${segments}
 
-        Người dùng hỏi: "${question}"
-        Hãy chọn đoạn phù hợp nhất, trả về số đoạn và nội dung đoạn đó.
-        `;
+            Truy vấn:
+            ${question}
+
+            Kết quả:
+            (Trả lại đúng một đoạn phù hợp nhất)
+                    `.trim();
 
         const result = await model.generateContent(prompt)
         const response = await result.response;
-        const text = response.text()
+        const text = response.text().trim();
         return text;
     }
 }

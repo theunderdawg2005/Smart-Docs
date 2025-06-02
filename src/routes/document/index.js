@@ -37,6 +37,8 @@ router.post('/add/:id', DocumentController.addDocToFolder)
 
 router.get('/sumarize/:id', DocumentController.summarizeDocument)
 
+router.get('/extract/:id', DocumentController.extractText)
+
 router.get('/filter', DocumentController.filterDocument)
 
 // Xem tài liệu

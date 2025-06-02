@@ -67,7 +67,7 @@ class DocumentController {
   // Sửa tài liệu
   async updateDocument(req, res) {
     try {
-      const document = await DocumentService.updateDocument(req.params.id, req.body);
+      const document = await DocumentService.updateDocument(req.params.id, req.body, req.user.userId);
       res.json({ message: 'Document updated successfully', document });
     } catch (error) {
       console.log(error.message);
@@ -206,6 +206,19 @@ class DocumentController {
       res.json(documents)
     } catch (error) {
       res.status(error.message === 'User not found' ? 404 : 500).json({
+        message: error.message
+      });
+    }
+  }
+
+  async extractText(req, res) {
+    try {
+      const extractedText = await DocumentService.extractTextFromDocument(req.params.id)
+      res.json({
+        text: extractedText
+      })
+    } catch (error) {
+      res.status(error.message === 'Document not found' ? 404 : 500).json({
         message: error.message
       });
     }

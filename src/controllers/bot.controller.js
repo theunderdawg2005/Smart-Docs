@@ -9,8 +9,7 @@ const model = genAI.getGenerativeModel({model: 'gemini-2.0-flash'})
 
 class BotController {
     summarize = async (req, res, next) => {
-        const document = await getDocumentById(req.params.id)
-        const textDoc = await extractTextFromDocument(document)
+        const textDoc = await extractTextFromDocument(req.params.id)
         
         const baseContext = 'Hãy tóm tắt đoạn văn bản sau: '
         const fullContext = baseContext + textDoc
@@ -24,6 +23,8 @@ class BotController {
         try {
             const { question } = req.body;
             const result = await botService.semanticSearch(question, req.params.id);
+            console.log(result);
+            
             res.json({ result });
         } catch (error) {
             console.error("Semantic Search Error:", error);

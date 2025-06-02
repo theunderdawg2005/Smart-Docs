@@ -11,6 +11,7 @@ const folderModel = require('../models/folder.model');
 const { BadRequestError } = require('openai');
 const { searchProductByUser } = require('../models/repository/product.repo');
 const { NotFoundError } = require('../core/error.response');
+const tagsModel = require('../models/tags.model');
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -42,18 +43,33 @@ class DocumentService {
   }
 
   // Sửa tài liệu
-  async updateDocument(id, { title, tags }) {
+  async updateDocument(documentId, { title, tags }, userId) {
+    const tagArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
     const document = await Document.findByIdAndUpdate(
-      id,
+      documentId,
       {
         title,
-        tags: tags ? tags.split(',').map(tag => tag.trim()) : []
+        tags: tagArray
       },
       { new: true }
     )
     if (!document) {
       throw new Error('Document not found');
     }
+    for(const tagTitle of tagArray) {
+      await tagsModel.findOneAndUpdate(
+        {title: tagTitle, userId },
+        {title: tagTitle, userId},
+        {upsert: true, new: true}
+    )
+    }
+      const allTags = await tagsModel.find({ userId });
+      for (const tag of allTags) {
+        const used = await Document.exists({ tags: tag.title, uploadedBy: userId });
+        if (!used) {
+          await tagsModel.deleteOne({ _id: tag._id });
+        }
+      }
     return document;
   }
 
@@ -121,9 +137,15 @@ class DocumentService {
     return document;
   }
 
-  async extractTextFromDocument(document)
+  async extractTextFromDocument(documentId)
   {
     try {
+
+      const document = await Document.findById(documentId)
+      if(document.extractedText)
+      {
+        return document.extractedText
+      }
       const response = await axios.get(document.fileUrl, { responseType: 'arraybuffer' })
       const fileBuffer = Buffer.from(response.data)
 
@@ -131,19 +153,24 @@ class DocumentService {
       console.log(fileExt);
       
       if (fileExt === 'application/pdf') {
-        
-        
         const pdfData = await pdfParse(fileBuffer);
+        document.extractedText = pdfData.text;
+        await document.save()
         return pdfData.text;
       } else if (fileExt === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const result = await mammoth.extractRawText({ buffer: fileBuffer });
+        document.extractedText = result.value;
+        await document.save()
         return result.value;
       } else if (fileExt === 'text/plain') {
+        document.extractedText = fileBuffer.toString()
+        await document.save()
         return fileBuffer.toString();
       } else {
         throw new Error('Unsupported file type');
       }
     } catch (error) {
+      
       throw new Error(`Error extracting text: ${error.message}`);
     }
   }
