@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const {db: {host, password, dbname}} = require('../configs/config.mongodb')
 const connectString = `mongodb+srv://${host}:${password}@smart-docs.1pheuzj.mongodb.net/${dbname}?retryWrites=true&w=majority`
-console.log(`connectionString:`, connectString);
 
 
 class Database {

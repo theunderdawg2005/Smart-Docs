@@ -1,6 +1,6 @@
 const { Types } = require("mongoose")
 const { BadRequestError } = require("../core/error.response")
-const keyTokenModel = require("../models/keyToken.model")
+const keyTokenModel = require("../models/keytoken.model")
 
 class KeyTokenService {
     static createKeyToken = async ({userId, refreshToken}) => {
