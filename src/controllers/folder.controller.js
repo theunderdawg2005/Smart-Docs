@@ -32,6 +32,18 @@ class FolderController {
             res.status(500).json({ message: "Error deleting folder", error: error.message })
         }
     }
+
+    updateFolder = async (req, res) => {
+        try {
+            const result = await FolderService.updateFolder(req.params.id, req.body)
+            new SuccessResponse({
+                metadata: result,
+                message: "Update folder successfully!"
+            }).send(res)
+        } catch (error) {
+            res.status(500).json({ message: "Error updating folder", error: error.message })
+        }
+    }
 }
 
 module.exports = new FolderController()

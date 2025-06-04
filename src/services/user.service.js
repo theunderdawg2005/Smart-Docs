@@ -23,7 +23,7 @@ const updateUser = async (userId, payload) => {
         }
     })
 
-    if(Object.keys(updatedData).length == 0)
+    if(Object.keys(updatedData).length === 0)
     {
         throw new Error("Không có trường hợp ngoại lệ!")
     }

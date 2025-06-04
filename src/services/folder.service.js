@@ -13,7 +13,7 @@ class FolderService {
     static getFoldersByUserId = async (userId) => {
         return await folderModel.find({
             userId: userId
-        }).sort({ createdAt: -1 }) // Sort by creation date, newest first
+        }).sort({ createdAt: -1 })
     }
 
     static getDocumentByFolderId = async (folderId) => {
@@ -26,7 +26,18 @@ class FolderService {
         return await folderModel.deleteOne({_id: id})
     }
 
-
+    static updateFolder = async (folderId, payload) => {
+        const {title} = payload
+        const updatedFolder = folderModel.findByIdAndUpdate(
+            folderId,
+            { title },
+            {new: true, runValidators: true}
+        )
+        if (!updatedFolder) {
+            throw new Error("Folder not found");
+        }
+        return updatedFolder;
+    }
 }
 
 module.exports = FolderService

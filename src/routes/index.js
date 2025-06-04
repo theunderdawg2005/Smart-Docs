@@ -13,4 +13,6 @@ router.use('/api', require('./config'))
 
 router.use('/tag', require('./tag'))
 
+router.use('/user', require('./user'))
+
 module.exports = router
