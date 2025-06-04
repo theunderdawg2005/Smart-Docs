@@ -9,5 +9,6 @@ router.post('/', folderController.createFolder)
 router.get('/', folderController.getFoldersByUserId)
 router.get('/:id', folderController.getDocumentsByFolderId)
 router.delete('/:id', folderController.deleteFolder)
+router.patch('/:id', folderController.updateFolder)
 
 module.exports = router

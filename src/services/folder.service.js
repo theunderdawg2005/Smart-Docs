@@ -27,10 +27,10 @@ class FolderService {
     }
 
     static updateFolder = async (folderId, payload) => {
-        const {title} = payload
+        const {name} = payload
         const updatedFolder = folderModel.findByIdAndUpdate(
             folderId,
-            { title },
+            { name },
             {new: true, runValidators: true}
         )
         if (!updatedFolder) {
