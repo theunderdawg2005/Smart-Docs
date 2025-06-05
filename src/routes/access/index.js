@@ -48,6 +48,8 @@ const router = express.Router()
 
 router.post('/sign-up', asyncHandler(accessController.signUp))
 
+router.post('/verify-user', asyncHandler(accessController.verifyUser))
+
 /**
  * @swagger
  * /api/v1/auth/login:

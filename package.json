@@ -33,6 +33,7 @@
     "nodemon": "^3.1.9",
     "openai": "^4.96.2",
     "pdf-parse": "^1.1.1",
+    "redis": "^5.5.5",
     "streamifier": "^0.1.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

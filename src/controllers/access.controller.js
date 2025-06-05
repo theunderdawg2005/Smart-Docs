@@ -4,11 +4,17 @@ const AccessService = require("../services/access.service")
 class AccessController {
     signUp = async (req, res, next) => {
         new CREATED({
-            message: "Đăng kí thành công!",
+            message: "OTP đã gửi đến email của bạn!",
             metadata: await AccessService.signUp(req.body)
         }).send(res)
     }
 
+    verifyUser = async (req, res) => {
+        new CREATED({
+            message: "Đã xác thực thành công!",
+            metadata: await AccessService.verifyUser(req.body)
+        }).send(res)
+    }
     login = async (req, res) => {
         new SuccessResponse({
             message: "Đăng nhập thành công",
